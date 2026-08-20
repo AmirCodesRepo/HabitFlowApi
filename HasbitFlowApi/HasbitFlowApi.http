@@ -1,0 +1,6 @@
+@HasbitFlowApi_HostAddress = http://localhost:5007
+
+GET {{HasbitFlowApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
