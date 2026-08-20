@@ -29,5 +29,24 @@ namespace HasbitFlowApi.Controllers
 
             return Ok();
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginDto dto)
+        {
+            var result = await _userService.LoginAsync(dto);
+
+            if (!result)
+            {
+                return Unauthorized(new
+                {
+                    message = "Invalid Email or Password"
+                });
+            }
+
+            return Ok(new
+            {
+                message = "Login successful"
+            });
+        }
     }
 }

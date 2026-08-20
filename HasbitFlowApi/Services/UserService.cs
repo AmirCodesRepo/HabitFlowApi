@@ -44,5 +44,24 @@ namespace HasbitFlowApi.Services
 
             return true;
         }
+
+        public async Task<bool> LoginAsync(LoginDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            
+            if (user is null)
+            {
+                return false;
+            }
+
+            var result = _passwordHasher.VerifyHashedPassword(user,user.PasswordHash, dto.Password);
+
+            if(result == PasswordVerificationResult.Failed)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
