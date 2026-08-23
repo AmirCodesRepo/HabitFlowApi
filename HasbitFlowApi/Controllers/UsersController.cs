@@ -37,9 +37,9 @@ namespace HasbitFlowApi.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var token = await _userService.LoginAsync(dto);
+            var result = await _userService.LoginAsync(dto);
 
-            if (token is null)
+            if (result is null)
             {
                 return Unauthorized(new
                 {
@@ -47,10 +47,43 @@ namespace HasbitFlowApi.Controllers
                 });
             }
 
-            return Ok(new
-            {
-                accessToken = token
-            });
+            return Ok(result);
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(RefreshTokenDto dto)
+        {
+            var result = await _userService.RevokeRefreshTokenAsync(dto.RefreshToken);
+
+            if (!result)
+                return BadRequest(
+                new
+                {
+                    message = "Invalid or already revoked refresh token"
+                }
+            );
+
+            return Ok(
+                new
+                {
+                    message = "Logged out successfully"
+                });
+
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh(RefreshTokenDto dto)
+        {
+            var result = await _userService.RefreshTokenAsync(dto.RefreshToken);
+
+            if (result is null)
+                return Unauthorized(
+                new
+                {
+                    message = "Invalid or expired refresh token"
+                });
+
+            return Ok(result);
         }
 
         [HttpGet("me")]
