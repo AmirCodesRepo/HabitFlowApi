@@ -8,5 +8,6 @@
         public string PasswordHash { get; set; }
         public DateTime CreatedAt { get; set; }
         public ICollection<Habit> Habits { get; set; }
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }

@@ -1,6 +1,10 @@
 ﻿using HasbitFlowApi.DTOs.Auth;
 using HasbitFlowApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace HasbitFlowApi.Controllers
 {
@@ -33,9 +37,9 @@ namespace HasbitFlowApi.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var result = await _userService.LoginAsync(dto);
+            var token = await _userService.LoginAsync(dto);
 
-            if (!result)
+            if (token is null)
             {
                 return Unauthorized(new
                 {
@@ -45,7 +49,31 @@ namespace HasbitFlowApi.Controllers
 
             return Ok(new
             {
-                message = "Login successful"
+                accessToken = token
+            });
+        }
+
+        [HttpGet("me")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetMe()
+        {
+            //var userIdValue = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var user = await _userService.GetUserByIdAsync(userId);
+
+            if (user is null)
+                return NotFound();
+
+            return Ok(new
+            {
+                user.Id,
+                user.Name,
+                user.Email,
+                user.CreatedAt
             });
         }
     }

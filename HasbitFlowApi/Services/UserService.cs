@@ -10,11 +10,13 @@ namespace HasbitFlowApi.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly PasswordHasher<User> _passwordHasher;
+        private readonly JwtService _jwtService;
 
-        public UserService(ApplicationDbContext context)
+        public UserService(ApplicationDbContext context,JwtService jwtService)
         {
             _context = context;
             _passwordHasher = new PasswordHasher<User>();
+            _jwtService = jwtService;
         }
 
         public async Task<bool> RegisterAsync(RegisterDto dto)
@@ -45,23 +47,28 @@ namespace HasbitFlowApi.Services
             return true;
         }
 
-        public async Task<bool> LoginAsync(LoginDto dto)
+        public async Task<string> LoginAsync(LoginDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             
             if (user is null)
             {
-                return false;
+                return null;
             }
 
             var result = _passwordHasher.VerifyHashedPassword(user,user.PasswordHash, dto.Password);
 
             if(result == PasswordVerificationResult.Failed)
             {
-                return false;
+                return null;
             }
 
-            return true;
+            return _jwtService.GenerateToken(user);
+        }
+
+        public async Task<User?> GetUserByIdAsync(Guid userId)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         }
     }
 }
