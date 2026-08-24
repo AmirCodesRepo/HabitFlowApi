@@ -1,6 +1,5 @@
 using HasbitFlowApi.Data;
 using HasbitFlowApi.Services;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
